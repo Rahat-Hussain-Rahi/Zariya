@@ -218,7 +218,7 @@ Zariya
 
 ---
 
-###Mission
+### Mission
 
 **"Connecting donors with those in need, making every donation count and every request reachable."**
 
