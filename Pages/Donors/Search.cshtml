@@ -1,0 +1,195 @@
+@page
+@model SearchModel
+@{
+    ViewData["Title"] = "Find Blood Donors";
+}
+
+<div class="find-body-bg min-vh-100 py-3">
+    <div class="container">
+        <!-- Title section -->
+        <div class="find-title-section d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3">
+            <div>
+                <h1>Available Donors</h1>
+                <p class="m-0">Showing search results for your critical requirement</p>
+            </div>
+            <div class="location-indicator">
+                <i class="fas fa-map-marker-alt"></i> Current Location: <span class="location-badge">@(Model.CityName ?? "Karachi"), PK</span>
+            </div>
+        </div>
+
+        <hr class="my-4" style="border-color: #E5D5D2;" />
+
+        <form method="get" id="searchForm">
+            <div class="row g-4">
+                <!-- Sidebar Filters -->
+                <div class="col-lg-3">
+                    <div class="filter-card">
+                        <h3><i class="fas fa-sliders-h text-danger" style="font-size: 1rem;"></i> Filters</h3>
+                        
+                        <div class="filter-group">
+                            <label class="filter-label">Blood Group</label>
+                            <select name="BloodGroup" class="filter-select" asp-for="BloodGroup">
+                                <option value="">Select Blood Group</option>
+                                @foreach (var bg in Model.BloodGroups)
+                                {
+                                    <option value="@bg">@bg</option>
+                                }
+                            </select>
+                        </div>
+
+                        <div class="filter-group">
+                            <label class="filter-label">City</label>
+                            <input type="text" name="CityName" class="filter-input" placeholder="e.g. Karachi" value="@Model.CityName" />
+                        </div>
+
+                        <div class="switch-container">
+                            <span class="switch-label">Available Now</span>
+                            <label class="custom-switch">
+                                <input type="checkbox" name="AvailableNow" value="true" @(Model.AvailableNow ? "checked" : "") onchange="document.getElementById('AvailableNowHidden').value = this.checked;" />
+                                <span class="switch-slider"></span>
+                            </label>
+                            <input type="hidden" id="AvailableNowHidden" name="AvailableNow" value="@(Model.AvailableNow ? "true" : "false")" />
+                        </div>
+
+                        <label class="checkbox-container">
+                            <input type="checkbox" name="VerifiedOnly" value="true" @(Model.VerifiedOnly ? "checked" : "") onchange="document.getElementById('VerifiedOnlyHidden').value = this.checked;" />
+                            <div class="custom-checkbox-box">
+                                <i class="fas fa-check"></i>
+                            </div>
+                            Verified Donors Only
+                        </label>
+                        <input type="hidden" id="VerifiedOnlyHidden" name="VerifiedOnly" value="@(Model.VerifiedOnly ? "true" : "false")" />
+
+                        <button type="submit" class="btn-apply-changes">Apply Changes</button>
+                    </div>
+
+                    <!-- Cant find donor red card -->
+                    <div class="broadcast-card-red text-center">
+                        <h4>Cant find a donor?</h4>
+                        <p>Broadcast an emergency request to all nearby donors instantly.</p>
+                        <a asp-page="/Index" class="btn btn-broadcast">Broadcast Request</a>
+                    </div>
+                </div>
+
+                <!-- Right Results Section -->
+                <div class="col-lg-9">
+                    <!-- Count & Sorting header -->
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <div class="fw-semibold text-muted" style="font-size: 0.95rem;">
+                            <span class="text-dark fw-bold" style="font-size: 1.1rem;">@Model.DonorsList.Count</span> Donors found in @(Model.CityName ?? "Karachi")
+                        </div>
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="text-muted fw-semibold" style="font-size: 0.9rem;">Sort by:</span>
+                            <select name="SortBy" class="border-0 bg-transparent fw-bold text-danger" style="outline: none; cursor: pointer;" asp-for="SortBy" onchange="this.form.submit();">
+                                <option value="Closest First">Closest First</option>
+                                <option value="Name">Name</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Cards Grid -->
+                    @if (Model.DonorsList.Any())
+                    {
+                        <div class="row g-4">
+                            @foreach (var donor in Model.DonorsList)
+                            {
+                                var isAvailable = donor.Availability == "Available";
+                                // Add check for Next Availability or Recently Donated status placeholders to mimic mockup screenshots
+                                var isRecentlyDonated = donor.TotalDonations > 0 && donor.TotalDonations % 3 == 0;
+                                var isWaitPeriod = !isAvailable && isRecentlyDonated;
+                                var isNextEligible = !isAvailable && !isRecentlyDonated;
+                                
+                                <div class="col-md-6">
+                                    <div class="donor-card-premium">
+                                        <!-- Top Profile section -->
+                                        <div class="donor-card-top">
+                                            <div class="donor-card-profile">
+                                                <img src="@(string.IsNullOrEmpty(donor.ProfilePhoto) ? "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&q=80&w=150" : donor.ProfilePhoto)" 
+                                                     class="donor-card-avatar" 
+                                                     alt="@donor.FullName" 
+                                                     onerror="this.src='https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&q=80&w=150';" />
+                                                <div>
+                                                    <a class="donor-card-name text-decoration-none" asp-page="/Donors/Details" asp-route-id="@donor.DonorId">@donor.FullName</a>
+                                                    @if (donor.IsAdminVerified)
+                                                    {
+                                                        <div class="donor-card-verified">
+                                                            <i class="fas fa-check-circle"></i> Verified Donor
+                                                        </div>
+                                                    }
+                                                </div>
+                                            </div>
+                                            <div class="donor-card-blood-badge">
+                                                <div class="donor-blood-group">@donor.BloodGroup</div>
+                                                <div class="donor-blood-label">Universal</div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Stats / Info section -->
+                                        <div class="donor-card-stats">
+                                            <div class="donor-stat-item">
+                                                <span class="donor-stat-title">Lives Saved</span>
+                                                <span class="donor-stat-value">@donor.TotalDonations Lives Saved</span>
+                                            </div>
+                                            <div class="donor-stat-item">
+                                                <span class="donor-stat-title">Location</span>
+                                                <span class="donor-stat-value">@(donor.City?.CityName ?? "Karachi")</span>
+                                            </div>
+                                        </div>
+
+                                        <!-- Card Footer availability and contact details -->
+                                        <div class="donor-card-footer">
+                                            @if (isAvailable)
+                                            {
+                                                <div class="availability-indicator text-success">
+                                                    <span class="dot-green"></span> Available Now
+                                                </div>
+                                                @if (!Model.IsLoggedIn)
+                                                {
+                                                    <a asp-page="/Account/Login" asp-route-returnUrl="@Url.Page("/Donors/Details", new { id = donor.DonorId })" class="btn-contact">Request Donor</a>
+                                                }
+                                                else
+                                                {
+                                                    <a asp-page="/Donors/Details" asp-route-id="@donor.DonorId" class="btn-contact">Request Donor</a>
+                                                }
+                                            }
+                                            else if (isWaitPeriod)
+                                            {
+                                                <div class="availability-indicator text-secondary">
+                                                    <span class="dot-gray"></span> Recently Donated
+                                                </div>
+                                                <a href="#" class="btn-wait">Wait Period</a>
+                                            }
+                                            else
+                                            {
+                                                <div class="availability-indicator text-danger">
+                                                    <span class="dot-red"></span> Next: @(donor.LastDonated?.AddMonths(3).ToString("dd MMM") ?? DateTime.Now.AddDays(15).ToString("dd MMM"))
+                                                </div>
+                                                @if (!Model.IsLoggedIn)
+                                                {
+                                                    <a asp-page="/Account/Login" asp-route-returnUrl="@Url.Page("/Donors/Details", new { id = donor.DonorId })" class="btn-contact">Request Donor</a>
+                                                }
+                                                else
+                                                {
+                                                    <a asp-page="/Donors/Details" asp-route-id="@donor.DonorId" class="btn-contact">Request Donor</a>
+                                                }
+                                            }
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-center py-5 border rounded-3 bg-white">
+                            <i class="fas fa-user-slash fa-3x text-muted mb-3"></i>
+                            <h3 class="h4 fw-bold">No Donors Found</h3>
+                            <p class="text-muted">We couldn't find any donors matching your criteria. Try widening your search or check back later.</p>
+                            <a asp-page="/Donors/Search" class="btn btn-outline-danger btn-sm rounded-pill px-4 py-2"><i class="fas fa-redo me-1"></i> Show All Donors</a>
+                        </div>
+                    }
+                </div>
+            </div>
+        </form>
+    </div>
+</div>

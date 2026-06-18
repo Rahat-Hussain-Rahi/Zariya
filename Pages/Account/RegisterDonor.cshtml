@@ -1,0 +1,118 @@
+@page
+@model Zariya.Pages.Account.RegisterDonorModel
+@{
+    ViewData["Title"] = "Become a Donor - Zariya";
+}
+
+<section class="results-header text-center">
+    <div class="container">
+        <h1 class="display-5 fw-bold">Become a Blood Donor</h1>
+        <p class="lead text-muted">Join Zariya and save lives. Complete your profile to list yourself as an available donor.</p>
+    </div>
+</section>
+
+<div class="container py-5">
+    <div class="card border-0 shadow-lg p-4 mx-auto" style="max-width: 650px; border-radius: var(--radius-md);">
+        <h2 class="h3 fw-bold text-center mb-4"><i class="fas fa-heart text-danger me-2"></i> Donor Registration</h2>
+        
+        @if (!string.IsNullOrEmpty(Model.SuccessMessage))
+        {
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                <i class="fas fa-check-circle me-2"></i> @Model.SuccessMessage
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        }
+
+        @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+        {
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <i class="fas fa-exclamation-triangle me-2"></i> @Model.ErrorMessage
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        }
+
+        <form method="post">
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <div class="form-group-custom">
+                        <label for="fullName">Full Name</label>
+                        <input type="text" id="fullName" asp-for="FullName" class="form-control-custom" placeholder="Ahmed Khan" required />
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group-custom">
+                        <label for="email">Email Address</label>
+                        <input type="email" id="email" asp-for="Email" class="form-control-custom" placeholder="ahmed@example.com" required />
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group-custom">
+                        <label for="password">Password</label>
+                        <input type="password" id="password" asp-for="Password" class="form-control-custom" placeholder="••••••••" required />
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group-custom">
+                        <label for="phone">Phone Number</label>
+                        <input type="text" id="phone" asp-for="Phone" class="form-control-custom" placeholder="+92 300 1234567" required />
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group-custom">
+                        <label for="cnic">CNIC Number</label>
+                        <input type="text" id="cnic" asp-for="Cnic" class="form-control-custom" placeholder="35201-1234567-1" required />
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group-custom">
+                        <label for="dateOfBirth">Date of Birth</label>
+                        <input type="date" id="dateOfBirth" asp-for="DateOfBirth" class="form-control-custom" required />
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="form-group-custom">
+                        <label for="gender">Gender</label>
+                        <select id="gender" asp-for="Gender" class="form-control-custom">
+                            <option value="Male">Male</option>
+                            <option value="Female">Female</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="form-group-custom">
+                        <label for="bloodGroup">Blood Group</label>
+                        <select id="bloodGroup" asp-for="BloodGroup" class="form-control-custom">
+                            @foreach (var bg in Model.BloodGroups)
+                            {
+                                <option value="@bg">@bg</option>
+                            }
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="form-group-custom">
+                        <label for="cityId">City</label>
+                        <select id="cityId" asp-for="CityId" class="form-control-custom" required>
+                            <option value="">Select City</option>
+                            @foreach (var city in Model.CitiesList)
+                            {
+                                <option value="@city.CityId">@city.CityName</option>
+                            }
+                        </select>
+                    </div>
+                </div>
+                <div class="col-12">
+                    <div class="form-group-custom">
+                        <label for="bio">Bio / Short Description (Optional)</label>
+                        <textarea id="bio" asp-for="Bio" class="form-control-custom" rows="3" placeholder="I am available on weekends..."></textarea>
+                    </div>
+                </div>
+                <div class="col-12 text-center mt-4">
+                    <button type="submit" class="btn btn-primary-custom w-100 py-3"><i class="fas fa-user-plus me-1"></i> Register as Donor</button>
+                    <p class="text-muted mt-3 mb-0">Already registered? <a asp-page="/Account/Login" class="text-danger fw-bold">Login here</a></p>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>

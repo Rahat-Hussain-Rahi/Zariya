@@ -1,0 +1,261 @@
+@page
+@model IndexModel
+@{
+    ViewData["Title"] = "Zariya";
+}
+
+<!-- Hero Section -->
+@if (Model.EmergencyRequests.Any())
+{
+    <section class="emergency-headlines">
+        <div class="container">
+            @foreach (var request in Model.EmergencyRequests)
+            {
+                <a asp-page="/Requests/Details" asp-route-id="@request.RequestId" class="emergency-headline-link">
+                    <i class="fas fa-bolt"></i>
+                    Emergency blood is needed: @request.BloodGroupNeeded in @(request.Patient.City?.CityName ?? "your area")
+                </a>
+            }
+        </div>
+    </section>
+}
+
+<section class="hero-section">
+    <div class="container">
+        <div class="row align-items-center g-5">
+            <div class="col-lg-6">
+                <div class="badge-emergency mb-3">
+                    <i class="fas fa-heartbeat text-danger"></i> Emergency Assistance Available 24/7
+                </div>
+                <h1 class="hero-title">
+                    Every Drop Matters.<br />
+                    <span class="text-primary-custom">Every Donor Saves Lives.</span>
+                </h1>
+                <p class="lead text-muted mb-4">
+                    Find verified blood donors and connect with them when it matters. Zariya bridges the gap between medical urgency and human empathy.
+                </p>
+                <div class="d-flex flex-wrap gap-3">
+                    <a asp-page="/Donors/Search" class="btn btn-primary-custom px-4 py-3">Find Blood</a>
+                    <a asp-page="/Account/RegisterDonor" class="btn btn-outline-custom px-4 py-3">Become a Donor</a>
+                </div>
+            </div>
+            <div class="col-lg-6 text-center">
+                <div class="hero-image-container">
+                    <img src="Logo.png" alt="Zariya 3D Heart Illustration" onerror="this.src='Logo.png';" />
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Search and Stats Container -->
+<div class="container mb-5">
+    <!-- Search Widget -->
+    <div class="search-widget">
+        <form method="get" asp-page="/Donors/Search">
+            <div class="row g-4 align-items-end">
+                <div class="col-md-5">
+                    <div class="search-field">
+                        <label><i class="fas fa-tint text-danger"></i> Blood Group</label>
+                        <i class="fas fa-chevron-down search-field-icon"></i>
+                        <select name="bloodGroup" class="search-select">
+                            <option value="">Select Group</option>
+                            @foreach (var bg in Model.BloodGroups)
+                            {
+                                <option value="@bg">@bg</option>
+                            }
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-5">
+                    <div class="search-field">
+                        <label><i class="fas fa-map-marker-alt text-danger"></i> City</label>
+                        <i class="fas fa-search search-field-icon"></i>
+                        <select name="cityId" class="search-select">
+                            <option value="">Select city name</option>
+                            @foreach (var city in Model.CitiesList)
+                            {
+                                <option value="@city.CityId">@city.CityName</option>
+                            }
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-primary-custom w-100 py-3 d-flex align-items-center justify-content-center gap-2">
+                        <i class="fas fa-search"></i> Find Donors
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Stats Section -->
+<section class="stats-section">
+    <div class="container">
+        <div class="row g-4">
+            <div class="col-md-3 col-6">
+                <div class="stat-card">
+                    <div class="stat-number">@Model.RegisteredDonorsCount.ToString("N0")</div>
+                    <div class="stat-label">Registered Donors</div>
+                </div>
+            </div>
+            <div class="col-md-3 col-6">
+                <div class="stat-card">
+                    <div class="stat-number">@Model.AvailableDonorsCount.ToString("N0")</div>
+                    <div class="stat-label">Available Donors</div>
+                </div>
+            </div>
+            <div class="col-md-3 col-6">
+                <div class="stat-card">
+                    <div class="stat-number">@Model.LivesHelpedCount.ToString("N0")</div>
+                    <div class="stat-label">Lives Helped</div>
+                </div>
+            </div>
+            <div class="col-md-3 col-6">
+                <div class="stat-card">
+                    <div class="stat-number">@Model.RequestsFulfilledCount.ToString("N0")</div>
+                    <div class="stat-label">Requests Fulfilled</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Available Blood Inventory -->
+<section class="py-5">
+    <div class="container">
+        <h2 class="section-title">Available Blood Inventory</h2>
+        <p class="section-subtitle">Real-time availability of verified donors across the network to ensure immediate response.</p>
+        
+        <div class="inventory-grid">
+            @foreach (var item in Model.BloodInventory)
+            {
+                // Simple percentage calculation for custom progress bars (max scale 6000)
+                var percentage = Math.Min(100.0, (item.Value / 6000.0) * 100.0);
+                
+                <div class="inventory-card">
+                    <div class="inventory-card-header">
+                        <span class="blood-type-label">@item.Key</span>
+                        <div class="blood-drop-icon">
+                            <i class="fas fa-droplet"></i>
+                        </div>
+                    </div>
+                    <div class="inventory-card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="text-muted">Available</span>
+                            <span class="fw-bold">@item.Value.ToString("N0")</span>
+                        </div>
+                        <div class="inventory-progress">
+                            <div class="inventory-progress-bar" style="width: @percentage%"></div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</section>
+
+<!-- How Zariya Connects Lives (Workflow) -->
+<section class="workflow-section">
+    <div class="container">
+        <h2 class="section-title">How Zariya Connects Lives</h2>
+        <p class="section-subtitle">A seamless three-step process to request or donate blood in times of need.</p>
+        
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="workflow-card">
+                    <div class="workflow-icon">
+                        <i class="fas fa-user-plus"></i>
+                    </div>
+                    <h3>1. Register</h3>
+                    <p>Create your profile as a donor or a person in need within seconds. Provide your blood group and location.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="workflow-card">
+                    <div class="workflow-icon">
+                        <i class="fas fa-shield-alt"></i>
+                    </div>
+                    <h3>2. Verify Identity</h3>
+                    <p>Our system verifies your credentials to ensure maximum reliability, security, and build mutual trust.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="workflow-card">
+                    <div class="workflow-icon">
+                        <i class="fas fa-phone-alt"></i>
+                    </div>
+                    <h3>3. Connect & Donate</h3>
+                    <p>Instantly find matching donors and connect via secure chat, emergency call, or coordinates.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Stories of Survival (Testimonials) -->
+<section class="testimonials-section">
+    <div class="container">
+        <h2 class="section-title">Stories of Survival</h2>
+        <p class="section-subtitle">Real stories from recipients and donors who used Zariya to make an impact.</p>
+        
+        <div class="row g-4">
+            <div class="col-md-6">
+                <div class="testimonial-card">
+                    <div>
+                        <div class="stars">
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                        </div>
+                        <p class="testimonial-text">
+                            "In an emergency at 2 AM, Zariya helped us find an O-negative donor in less than 30 minutes. This portal is literally a lifesaver."
+                        </p>
+                    </div>
+                    <div class="testimonial-author">
+                        <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=150" alt="Ahmed K." class="testimonial-avatar" />
+                        <div class="testimonial-author-info">
+                            <h4>Ahmed K.</h4>
+                            <span>Recipient</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="testimonial-card">
+                    <div>
+                        <div class="stars">
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                        </div>
+                        <p class="testimonial-text">
+                            "The verification process gave me confidence that my donation was going to someone truly in need. I have donated four times through Zariya now."
+                        </p>
+                    </div>
+                    <div class="testimonial-author">
+                        <img src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&q=80&w=150" alt="Sara M." class="testimonial-avatar" />
+                        <div class="testimonial-author-info">
+                            <h4>Sara M.</h4>
+                            <span>Verified Donor</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Call to Action Banner -->
+<div class="container">
+    <div class="cta-banner">
+        <h2>Become a Lifesaver Today</h2>
+        <p>Join a community of thousands who are ready to help. Your simple registration could mean the world to someone in crisis.</p>
+        <a asp-page="/Account/RegisterDonor" class="btn btn-white-custom">Register Now</a>
+    </div>
+</div>

@@ -1,0 +1,61 @@
+@page "{id:int}"
+@model Zariya.Pages.Donors.DetailsModel
+@{
+    ViewData["Title"] = "Donor Details";
+}
+
+@if (Model.Donor != null)
+{
+    <div class="container py-5">
+        <div class="row g-4">
+            <div class="col-lg-4">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body text-center p-4">
+                        <img src="@(string.IsNullOrEmpty(Model.Donor.ProfilePhoto) ? "/images/logo.png" : Model.Donor.ProfilePhoto)"
+                             alt="@Model.Donor.FullName"
+                             class="rounded-circle mb-3"
+                             style="width: 120px; height: 120px; object-fit: cover;" />
+                        <h1 class="h4 fw-bold">@Model.Donor.FullName</h1>
+                        <div class="badge bg-danger fs-6 mb-2">@Model.Donor.BloodGroup</div>
+                        <div class="text-muted">@(Model.Donor.City?.CityName ?? "City not listed")</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-8">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body p-4">
+                        <h2 class="h5 fw-bold mb-3">Contact and Donation Details</h2>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <div class="text-muted small">Phone</div>
+                                <div class="fw-semibold">@Model.Donor.Phone</div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="text-muted small">Email</div>
+                                <div class="fw-semibold">@Model.Donor.User.Email</div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="text-muted small">Availability</div>
+                                <div class="fw-semibold">@Model.Donor.Availability</div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="text-muted small">Total Donations</div>
+                                <div class="fw-semibold">@Model.Donor.TotalDonations</div>
+                            </div>
+                        </div>
+                        @if (!string.IsNullOrWhiteSpace(Model.Donor.Bio))
+                        {
+                            <hr />
+                            <p class="mb-0">@Model.Donor.Bio</p>
+                        }
+                        <div class="mt-4 d-flex gap-2 flex-wrap">
+                            <a href="tel:@Model.Donor.Phone" class="btn btn-primary-custom">Call Donor</a>
+                            <a href="mailto:@Model.Donor.User.Email" class="btn btn-outline-custom">Email Donor</a>
+                            <a asp-page="/Donors/Search" class="btn btn-outline-secondary">Back to Search</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}

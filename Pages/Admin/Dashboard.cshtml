@@ -1,0 +1,1068 @@
+@page
+@model Zariya.Pages.Admin.DashboardModel
+@{
+    Layout = null;
+    ViewData["Title"] = "Admin Dashboard";
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"]</title>
+    
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <!-- Custom Styles -->
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+</head>
+<body class="admin-body">
+
+    <!-- Admin Sidebar -->
+    <aside class="admin-sidebar">
+        <div>
+            <!-- Sidebar logo block -->
+            <div class="admin-logo-block">
+                <a asp-page="/Index" class="text-decoration-none">
+                    <h2 class="admin-logo-title">Zariya</h2>
+                </a>
+                <p class="admin-logo-subtitle">Healthcare Command Center</p>
+            </div>
+
+            <!-- Sidebar Navigation -->
+            <ul class="admin-nav-list">
+                <li>
+                    <a asp-page="/Admin/Dashboard" asp-route-tab="overview" class="admin-nav-link @(Model.Tab == "overview" ? "active" : "")">
+                        <span class="admin-nav-label">
+                            <i class="fas fa-chart-line"></i> Overview
+                        </span>
+                    </a>
+                </li>
+                <li>
+                    <a asp-page="/Admin/Dashboard" asp-route-tab="donors" class="admin-nav-link @(Model.Tab == "donors" ? "active" : "")">
+                        <span class="admin-nav-label">
+                            <i class="fas fa-users"></i> Donor Mgmt
+                        </span>
+                    </a>
+                </li>
+                <li>
+                    <a asp-page="/Admin/Dashboard" asp-route-tab="patients" class="admin-nav-link @(Model.Tab == "patients" ? "active" : "")">
+                        <span class="admin-nav-label">
+                            <i class="fas fa-users-viewfinder"></i> Recipient Mgmt
+                        </span>
+                    </a>
+                </li>
+                <li>
+                    <a href="#" class="admin-nav-link">
+                        <span class="admin-nav-label">
+                            <i class="fas fa-user-shield"></i> Verification Center
+                        </span>
+                        <span class="admin-badge-count">@Model.VerificationQueue.Count(q => q.DonorId > 0)</span>
+                    </a>
+                </li>
+                <li>
+                    <a asp-page="/Admin/Dashboard" asp-route-tab="users" class="admin-nav-link @(Model.Tab == "users" ? "active" : "")">
+                        <span class="admin-nav-label">
+                            <i class="fas fa-user-cog"></i> User Mgmt
+                        </span>
+                    </a>
+                </li>
+                <li>
+                    <a asp-page="/Admin/Dashboard" asp-route-tab="complaints" class="admin-nav-link @(Model.Tab == "complaints" ? "active" : "")">
+                        <span class="admin-nav-label">
+                            <i class="fas fa-flag"></i> Complaints
+                        </span>
+                        <span class="admin-badge-count">@Model.PendingComplaintsCount</span>
+                    </a>
+                </li>
+                <li>
+                    <a asp-page="/Admin/Dashboard" asp-route-tab="messages" class="admin-nav-link @(Model.Tab == "messages" ? "active" : "")">
+                        <span class="admin-nav-label">
+                            <i class="fas fa-envelope"></i> Messages
+                        </span>
+                        <span class="admin-badge-count">@Model.UnreadMessagesCount</span>
+                    </a>
+                </li>
+                    <li>
+                        <a asp-page="/Admin/Dashboard" asp-route-tab="settings" class="admin-nav-link @(Model.Tab == "settings" ? "active" : "")">
+                            <span class="admin-nav-label">
+                                <i class="fas fa-cog"></i> Settings
+                            </span>
+                        </a>
+                    </li>
+            </ul>
+        </div>
+
+        <div class="admin-sidebar-bottom">
+            <!-- Admin Profile Box -->
+            <div class="admin-profile-card">
+                <img src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&q=80&w=150" alt="Admin Profile" class="admin-profile-avatar" />
+                <div>
+                    <h4 class="admin-profile-name">@(HttpContext.Session.GetString("UserName") ?? "System Admin")</h4>
+                    <p class="admin-profile-role">Chief Administrator</p>
+                    <form method="post" asp-page="/Account/Login" asp-page-handler="Logout" class="mt-1">
+                        <button type="submit" class="btn btn-link p-0 text-danger text-decoration-none" style="font-size: 0.75rem;"><i class="fas fa-sign-out-alt"></i> Logout</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Main Workspace -->
+    <main class="admin-workspace">
+        
+        <!-- Header Row -->
+        <div class="admin-header-row">
+            @if (Model.Tab == "donors")
+            {
+                <div>
+                    <h1 class="admin-header-title">Donor Management</h1>
+                    <p class="admin-header-subtitle">Manage donor accounts, verification status, and availability.</p>
+                </div>
+            }
+            else if (Model.Tab == "patients")
+            {
+                <div>
+                    <h1 class="admin-header-title">Recipient Management</h1>
+                    <p class="admin-header-subtitle">Manage patient accounts, medical conditions, and blood requests.</p>
+                </div>
+            }
+            else if (Model.Tab == "users")
+            {
+                <div>
+                    <h1 class="admin-header-title">User Management</h1>
+                    <p class="admin-header-subtitle">Create new accounts and remove outdated users from the system.</p>
+                </div>
+            }
+            else if (Model.Tab == "complaints")
+            {
+                <div>
+                    <h1 class="admin-header-title">Complaints Management</h1>
+                    <p class="admin-header-subtitle">Review and resolve user reports and flagged content.</p>
+                </div>
+            }
+            else if (Model.Tab == "messages")
+            {
+                <div>
+                    <h1 class="admin-header-title">Contact Messages</h1>
+                    <p class="admin-header-subtitle">Read and manage inquiries from website visitors.</p>
+                </div>
+            }
+            else
+            {
+                <div>
+                    <h1 class="admin-header-title">Dashboard Overview</h1>
+                    <p class="admin-header-subtitle">Real-time status of blood logistics and donor availability.</p>
+                </div>
+                <!-- Time Filter Toggle -->
+                <div class="time-filter-toggle">
+                    <button class="time-filter-btn @(Model.TimeFilter == "24h" ? "active" : "")" onclick="location.href='?timeFilter=24h'">Last 24h</button>
+                    <button class="time-filter-btn @(Model.TimeFilter == "7d" ? "active" : "")" onclick="location.href='?timeFilter=7d'">7 Days</button>
+                    <button class="time-filter-btn @(Model.TimeFilter == "30d" ? "active" : "")" onclick="location.href='?timeFilter=30d'">30 Days</button>
+                </div>
+            }
+        </div>
+
+        <!-- Success/Error alert banners -->
+        @if (!string.IsNullOrEmpty(Model.SuccessMessage))
+        {
+            <div class="alert alert-success alert-dismissible fade show mb-4" role="alert">
+                <i class="fas fa-check-circle me-2"></i> @Model.SuccessMessage
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        }
+        @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+        {
+            <div class="alert alert-danger alert-dismissible fade show mb-4" role="alert">
+                <i class="fas fa-exclamation-triangle me-2"></i> @Model.ErrorMessage
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        }
+
+        @if (Model.Tab == "donors")
+        {
+            <div class="admin-panel-card">
+                <div class="admin-panel-header">
+                    <h2 class="admin-panel-title">All Registered Donors</h2>
+                    <a asp-page="/Account/RegisterDonor" class="btn btn-danger btn-sm"><i class="fas fa-plus me-1"></i> Register Donor</a>
+                </div>
+                
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mt-3" style="font-size: 0.9rem;">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Name</th>
+                                <th>CNIC</th>
+                                <th>Contact & City</th>
+                                <th>Blood Group</th>
+                                <th>Availability</th>
+                                <th>Status</th>
+                                <th style="text-align: right;">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var donor in Model.DonorsList)
+                            {
+                                <tr>
+                                    <td>
+                                        <div class="fw-bold">@donor.FullName</div>
+                                        <div class="text-muted" style="font-size: 0.75rem;">@donor.User?.Email</div>
+                                    </td>
+                                    <td>@donor.Cnic</td>
+                                    <td>
+                                        <div>@donor.Phone</div>
+                                        <div class="text-muted" style="font-size: 0.75rem;">@(donor.City?.CityName ?? "No City")</div>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-danger px-2.5 py-1.5 fs-7">@donor.BloodGroup</span>
+                                    </td>
+                                    <td>
+                                        @if (donor.Availability == "Available")
+                                        {
+                                            <span class="badge bg-success">Available</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-secondary">Unavailable</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        @if (donor.IsAdminVerified)
+                                        {
+                                            <span class="text-success"><i class="fas fa-check-circle me-1"></i> Verified</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-warning"><i class="fas fa-clock me-1"></i> Pending</span>
+                                        }
+                                    </td>
+                                    <td style="text-align: right;">
+                                        <button class="btn btn-outline-primary btn-sm me-1" data-bs-toggle="modal" data-bs-target="#editDonorModal-@donor.DonorId">
+                                            <i class="fas fa-edit"></i> Edit
+                                        </button>
+                                        <button type="button" class="btn btn-outline-danger btn-sm" data-bs-toggle="modal" data-bs-target="#confirmDeleteModal" data-delete-id="@donor.DonorId" data-delete-name="@donor.FullName" data-delete-handler="DeleteDonor">
+                                            <i class="fas fa-trash"></i> Delete
+                                        </button>
+                                    </td>
+                                </tr>
+
+                                <!-- Edit Donor Modal -->
+                                <div class="modal fade" id="editDonorModal-@donor.DonorId" tabindex="-1" aria-labelledby="editDonorModalLabel-@donor.DonorId" aria-hidden="true">
+                                    <div class="modal-dialog text-dark">
+                                        <div class="modal-content">
+                                            <form method="post" asp-page-handler="EditDonor">
+                                                <input type="hidden" name="editDonorId" value="@donor.DonorId" />
+                                                <div class="modal-header">
+                                                    <h5 class="modal-title" id="editDonorModalLabel-@donor.DonorId">Edit Donor Profile - @donor.FullName</h5>
+                                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                </div>
+                                                <div class="modal-body text-start">
+                                                    <div class="mb-3">
+                                                        <label class="form-label">Full Name</label>
+                                                        <input type="text" name="fullName" class="form-control" value="@donor.FullName" required />
+                                                    </div>
+                                                    <div class="mb-3">
+                                                        <label class="form-label">Phone</label>
+                                                        <input type="text" name="phone" class="form-control" value="@donor.Phone" required />
+                                                    </div>
+                                                    <div class="mb-3">
+                                                        <label class="form-label">Blood Group</label>
+                                                        <select name="bloodGroup" class="form-select" required>
+                                                            @foreach (var bg in Model.BloodGroups)
+                                                            {
+                                                                <option value="@bg" selected="@(donor.BloodGroup == bg)">@bg</option>
+                                                            }
+                                                        </select>
+                                                    </div>
+                                                    <div class="mb-3">
+                                                        <label class="form-label">Availability</label>
+                                                        <select name="availability" class="form-select" required>
+                                                            <option value="Available" selected="@(donor.Availability == "Available")">Available</option>
+                                                            <option value="Unavailable" selected="@(donor.Availability != "Available")">Unavailable</option>
+                                                        </select>
+                                                    </div>
+                                                    <div class="mb-3">
+                                                        <label class="form-label">City</label>
+                                                        <select name="cityId" class="form-select" required>
+                                                            @foreach (var city in Model.CitiesList)
+                                                            {
+                                                                <option value="@city.CityId" selected="@(donor.CityId == city.CityId)">@city.CityName, @city.Province</option>
+                                                            }
+                                                        </select>
+                                                    </div>
+                                                    <div class="mb-3 form-check">
+                                                        <input type="checkbox" name="isAdminVerified" class="form-check-input" id="verify-@donor.DonorId" value="true" @(donor.IsAdminVerified ? "checked" : "") />
+                                                        <input type="hidden" name="isAdminVerified" value="false" />
+                                                        <label class="form-check-label" for="verify-@donor.DonorId">Admin Verified</label>
+                                                    </div>
+                                                </div>
+                                                <div class="modal-footer">
+                                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                                    <button type="submit" class="btn btn-primary">Save Changes</button>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        }
+        else if (Model.Tab == "patients")
+        {
+            <div class="admin-panel-card">
+                <div class="admin-panel-header">
+                    <h2 class="admin-panel-title">All Registered Recipients</h2>
+                </div>
+                
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mt-3" style="font-size: 0.9rem;">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Name</th>
+                                <th>CNIC</th>
+                                <th>Contact & City</th>
+                                <th>Blood Group</th>
+                                <th>Medical Condition</th>
+                                <th>Urgency</th>
+                                <th style="text-align: right;">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var patient in Model.PatientsList)
+                            {
+                                <tr>
+                                    <td>
+                                        <div class="fw-bold">@patient.FullName</div>
+                                        <div class="text-muted" style="font-size: 0.75rem;">@patient.User?.Email</div>
+                                    </td>
+                                    <td>@patient.Cnic</td>
+                                    <td>
+                                        <div>@patient.Phone</div>
+                                        <div class="text-muted" style="font-size: 0.75rem;">@(patient.City?.CityName ?? "No City")</div>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-primary px-2.5 py-1.5 fs-7">@patient.BloodGroup</span>
+                                    </td>
+                                    <td>@patient.MedicalCondition</td>
+                                    <td>
+                                        @if (patient.UrgencyLevel.ToLower() == "critical")
+                                        {
+                                            <span class="badge bg-danger">Critical</span>
+                                        }
+                                        else if (patient.UrgencyLevel.ToLower() == "urgent")
+                                        {
+                                            <span class="badge bg-warning text-dark">Urgent</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-info text-dark">Normal</span>
+                                        }
+                                    </td>
+                                    <td style="text-align: right;">
+                                        <button class="btn btn-outline-primary btn-sm me-1" data-bs-toggle="modal" data-bs-target="#editPatientModal-@patient.PatientId">
+                                            <i class="fas fa-edit"></i> Edit
+                                        </button>
+                                        <button type="button" class="btn btn-outline-danger btn-sm" data-bs-toggle="modal" data-bs-target="#confirmDeleteModal" data-delete-id="@patient.PatientId" data-delete-name="@patient.FullName" data-delete-handler="DeletePatient">
+                                            <i class="fas fa-trash"></i> Delete
+                                        </button>
+                                    </td>
+                                </tr>
+
+                                <!-- Edit Patient Modal -->
+                                <div class="modal fade" id="editPatientModal-@patient.PatientId" tabindex="-1" aria-labelledby="editPatientModalLabel-@patient.PatientId" aria-hidden="true">
+                                    <div class="modal-dialog text-dark">
+                                        <div class="modal-content">
+                                            <form method="post" asp-page-handler="EditPatient">
+                                                <input type="hidden" name="editPatientId" value="@patient.PatientId" />
+                                                <div class="modal-header">
+                                                    <h5 class="modal-title" id="editPatientModalLabel-@patient.PatientId">Edit Recipient Profile - @patient.FullName</h5>
+                                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                </div>
+                                                <div class="modal-body text-start">
+                                                    <div class="mb-3">
+                                                        <label class="form-label">Full Name</label>
+                                                        <input type="text" name="fullName" class="form-control" value="@patient.FullName" required />
+                                                    </div>
+                                                    <div class="mb-3">
+                                                        <label class="form-label">Phone</label>
+                                                        <input type="text" name="phone" class="form-control" value="@patient.Phone" required />
+                                                    </div>
+                                                    <div class="mb-3">
+                                                        <label class="form-label">Blood Group</label>
+                                                        <select name="bloodGroup" class="form-select" required>
+                                                            @foreach (var bg in Model.BloodGroups)
+                                                            {
+                                                                <option value="@bg" selected="@(patient.BloodGroup == bg)">@bg</option>
+                                                            }
+                                                        </select>
+                                                    </div>
+                                                    <div class="mb-3">
+                                                        <label class="form-label">Medical Condition</label>
+                                                        <input type="text" name="medicalCondition" class="form-control" value="@patient.MedicalCondition" />
+                                                    </div>
+                                                    <div class="mb-3">
+                                                        <label class="form-label">Urgency Level</label>
+                                                        <select name="urgencyLevel" class="form-select" required>
+                                                            <option value="normal" selected="@(patient.UrgencyLevel == "normal")">Normal</option>
+                                                            <option value="urgent" selected="@(patient.UrgencyLevel == "urgent")">Urgent</option>
+                                                            <option value="critical" selected="@(patient.UrgencyLevel == "critical")">Critical</option>
+                                                        </select>
+                                                    </div>
+                                                    <div class="mb-3">
+                                                        <label class="form-label">City</label>
+                                                        <select name="cityId" class="form-select" required>
+                                                            @foreach (var city in Model.CitiesList)
+                                                            {
+                                                                <option value="@city.CityId" selected="@(patient.CityId == city.CityId)">@city.CityName, @city.Province</option>
+                                                            }
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                                <div class="modal-footer">
+                                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                                    <button type="submit" class="btn btn-primary">Save Changes</button>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        }
+        else if (Model.Tab == "messages")
+        {
+            <div class="admin-panel-card">
+                <div class="admin-panel-header">
+                    <h2 class="admin-panel-title">Contact Messages</h2>
+                </div>
+                @if (Model.ContactMessagesList.Count == 0)
+                {
+                    <div class="text-center py-5 text-muted">
+                        <i class="fas fa-inbox fa-3x mb-3 opacity-50"></i>
+                        <h5>No Messages</h5>
+                        <p class="mb-0">No contact form submissions yet.</p>
+                    </div>
+                }
+                else
+                {
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mt-3" style="font-size: 0.9rem;">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Name</th>
+                                    <th>Email</th>
+                                    <th>Subject</th>
+                                    <th>Status</th>
+                                    <th style="text-align: right;">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var m in Model.ContactMessagesList)
+                                {
+                                    <tr class="@(m.IsRead ? "" : "table-primary")">
+                                        <td style="white-space:nowrap;">@m.CreatedAt.ToString("MMM dd, hh:mm tt")</td>
+                                        <td class="fw-bold">@m.Name</td>
+                                        <td>@m.Email</td>
+                                        <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">@m.Subject</td>
+                                        <td>
+                                            @if (m.IsRead)
+                                            {
+                                                <span class="badge bg-secondary">Read</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge bg-primary">New</span>
+                                            }
+                                        </td>
+                                        <td style="text-align: right; white-space:nowrap;">
+                                            <button class="btn btn-outline-info btn-sm me-1" data-bs-toggle="modal" data-bs-target="#readMessageModal-@m.Id"><i class="fas fa-eye"></i> Read</button>
+                                            <button type="button" class="btn btn-outline-danger btn-sm" data-bs-toggle="modal" data-bs-target="#deleteMessageModal-@m.Id"><i class="fas fa-trash"></i> Delete</button>
+                                        </td>
+                                    </tr>
+
+                                    <!-- Read Message Modal -->
+                                    <div class="modal fade text-dark" id="readMessageModal-@m.Id" tabindex="-1" aria-hidden="true">
+                                        <div class="modal-dialog modal-lg modal-dialog-centered">
+                                            <div class="modal-content">
+                                                <form method="post" asp-page-handler="MarkMessageRead">
+                                                    <input type="hidden" name="messageId" value="@m.Id" />
+                                                    <div class="modal-header">
+                                                        <h5 class="modal-title">@m.Subject</h5>
+                                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                    </div>
+                                                    <div class="modal-body">
+                                                        <p><strong>From:</strong> @m.Name (@m.Email)</p>
+                                                        <p><strong>Date:</strong> @m.CreatedAt.ToString("MMM dd, yyyy hh:mm tt")</p>
+                                                        <hr />
+                                                        <p style="white-space:pre-wrap;">@m.Message</p>
+                                                    </div>
+                                                    <div class="modal-footer">
+                                                        @if (!m.IsRead)
+                                                        {
+                                                            <button type="submit" class="btn btn-primary">Mark as Read</button>
+                                                        }
+                                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                                    </div>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Delete Message Modal -->
+                                    <div class="modal fade text-dark" id="deleteMessageModal-@m.Id" tabindex="-1" aria-hidden="true">
+                                        <div class="modal-dialog modal-dialog-centered">
+                                            <div class="modal-content">
+                                                <form method="post" asp-page-handler="DeleteMessage">
+                                                    <input type="hidden" name="messageId" value="@m.Id" />
+                                                    <div class="modal-header">
+                                                        <h5 class="modal-title text-danger">Delete Message</h5>
+                                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                    </div>
+                                                    <div class="modal-body">
+                                                        <p>Are you sure you want to delete the message from <strong>@m.Name</strong>?</p>
+                                                    </div>
+                                                    <div class="modal-footer">
+                                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                                        <button type="submit" class="btn btn-danger">Delete</button>
+                                                    </div>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+            </div>
+        }
+        else if (Model.Tab == "settings")
+        {
+            <div class="admin-panel-card">
+                <div class="admin-panel-header">
+                    <h2 class="admin-panel-title">Settings</h2>
+                </div>
+                <div class="mt-3">
+                    @await Html.PartialAsync("_SettingsPartial")
+                </div>
+            </div>
+        }
+        else if (Model.Tab == "complaints")
+        {
+            <div class="admin-panel-card">
+                <div class="admin-panel-header">
+                    <h2 class="admin-panel-title">Complaints Management</h2>
+                </div>
+                @if (Model.ComplaintsList.Count == 0)
+                {
+                    <div class="text-center py-5 text-muted">
+                        <i class="fas fa-check-circle fa-3x mb-3 opacity-50"></i>
+                        <h5>No Complaints</h5>
+                        <p class="mb-0">All clear! No complaints have been filed.</p>
+                    </div>
+                }
+                else
+                {
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mt-3" style="font-size: 0.9rem;">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Reported By</th>
+                                    <th>Reported User</th>
+                                    <th>Reason</th>
+                                    <th>Status</th>
+                                    <th style="text-align: right;">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var c in Model.ComplaintsList)
+                                {
+                                    <tr>
+                                        <td style="white-space:nowrap;">@c.CreatedAt.ToString("MMM dd, hh:mm tt")</td>
+                                        <td>@c.Reporter?.FullName <span class="text-muted" style="font-size:0.75rem;">(@c.Reporter?.Email)</span></td>
+                                        <td>@c.ReportedUser?.FullName <span class="text-muted" style="font-size:0.75rem;">(@c.ReportedUser?.Email)</span></td>
+                                        <td><span class="badge bg-warning text-dark">@c.Reason</span></td>
+                                        <td>
+                                            @if (c.Status == "open")
+                                            {
+                                                <span class="badge bg-danger">Open</span>
+                                            }
+                                            else if (c.Status == "resolved")
+                                            {
+                                                <span class="badge bg-success">Resolved</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge bg-secondary">@c.Status</span>
+                                            }
+                                        </td>
+                                        <td style="text-align: right;">
+                                            @if (c.Status == "open")
+                                            {
+                                                <button class="btn btn-outline-success btn-sm" data-bs-toggle="modal" data-bs-target="#resolveComplaintModal-@c.ComplaintId">
+                                                    <i class="fas fa-check me-1"></i> Resolve
+                                                </button>
+
+                                                <!-- Resolve Modal -->
+                                                <div class="modal fade text-dark" id="resolveComplaintModal-@c.ComplaintId" tabindex="-1" aria-hidden="true">
+                                                    <div class="modal-dialog modal-dialog-centered">
+                                                        <div class="modal-content">
+                                                            <form method="post" asp-page-handler="ResolveComplaint">
+                                                                <input type="hidden" name="complaintId" value="@c.ComplaintId" />
+                                                                <div class="modal-header">
+                                                                    <h5 class="modal-title">Resolve Complaint</h5>
+                                                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                                </div>
+                                                                <div class="modal-body text-start">
+                                                                    <p class="text-muted">Reporting <strong>@c.ReportedUser?.FullName</strong> by <strong>@c.Reporter?.FullName</strong></p>
+                                                                    <p><strong>Reason:</strong> @c.Reason</p>
+                                                                    <p><strong>Description:</strong> @c.Description</p>
+                                                                    <div class="mb-3">
+                                                                        <label class="form-label fw-semibold">Admin Notes</label>
+                                                                        <textarea name="adminNotes" class="form-control" rows="3" placeholder="Resolution notes..."></textarea>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="modal-footer">
+                                                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                                                    <button type="submit" class="btn btn-success">Mark Resolved</button>
+                                                                </div>
+                                                            </form>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            }
+                                            else
+                                            {
+                                                <span class="text-muted small" title="@c.AdminNotes">@(c.ResolvedByNavigation?.FullName ?? "Admin")</span>
+                                            }
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+            </div>
+        }
+        else if (Model.Tab == "users")
+        {
+            <div class="admin-panel-card mb-4">
+                <div class="admin-panel-header">
+                    <h2 class="admin-panel-title">Create User</h2>
+                </div>
+                <form method="post" asp-page-handler="CreateUser" class="row g-3">
+                    <div class="col-md-3">
+                        <label class="form-label">Full Name</label>
+                        <input name="fullName" class="form-control" required />
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Email</label>
+                        <input name="email" type="email" class="form-control" required />
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label">Password</label>
+                        <input name="password" type="password" class="form-control" required />
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label">Role</label>
+                        <select name="role" class="form-select" required>
+                            <option value="admin">Admin</option>
+                            <option value="donor">Donor</option>
+                            <option value="recipient">Recipient</option>
+                            <option value="patient">Patient</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2 d-flex align-items-end">
+                        <button type="submit" class="btn btn-danger w-100">Add User</button>
+                    </div>
+                </form>
+            </div>
+
+            <div class="admin-panel-card">
+                <div class="admin-panel-header">
+                    <h2 class="admin-panel-title">All Users</h2>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mt-3" style="font-size: 0.9rem;">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Role</th>
+                                <th>Status</th>
+                                <th style="text-align: right;">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var user in Model.UsersList)
+                            {
+                                <tr>
+                                    <td class="fw-bold">@user.FullName</td>
+                                    <td>@user.Email</td>
+                                    <td class="text-capitalize">@user.Role</td>
+                                    <td>
+                                        @if (user.IsActive)
+                                        {
+                                            <span class="badge bg-success">Active</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-secondary">Inactive</span>
+                                        }
+                                    </td>
+                                    <td style="text-align: right;">
+                                        <button type="button" class="btn btn-outline-danger btn-sm" data-bs-toggle="modal" data-bs-target="#confirmDeleteModal" data-delete-id="@user.UserId" data-delete-name="@user.FullName" data-delete-handler="DeleteUser">
+                                            <i class="fas fa-trash"></i> Delete
+                                        </button>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        }
+        else
+        {
+            <!-- KPI statistics cards (6 columns) -->
+            <div class="admin-kpi-grid">
+                
+                <!-- Total Donors -->
+                <div class="admin-kpi-card">
+                    <div class="admin-kpi-card-header">
+                        <i class="fas fa-users admin-kpi-card-icon"></i>
+                        <span class="admin-kpi-badge green">+4%</span>
+                    </div>
+                    <div>
+                        <div class="admin-kpi-label">Total Donors</div>
+                        <h3 class="admin-kpi-value">@Model.TotalDonors.ToString("N0")</h3>
+                    </div>
+                </div>
+
+                <!-- Total Recipients -->
+                <div class="admin-kpi-card">
+                    <div class="admin-kpi-card-header">
+                        <i class="fas fa-users-viewfinder admin-kpi-card-icon"></i>
+                        <span class="admin-kpi-badge blue">Steady</span>
+                    </div>
+                    <div>
+                        <div class="admin-kpi-label">Total Recipients</div>
+                        <h3 class="admin-kpi-value">@Model.TotalRecipients.ToString("N0")</h3>
+                    </div>
+                </div>
+
+                <!-- Active Requests -->
+                <div class="admin-kpi-card urgent-border">
+                    <div class="admin-kpi-card-header">
+                        <i class="fas fa-heartbeat admin-kpi-card-icon urgent-icon"></i>
+                        <span class="admin-kpi-badge red">Urgent</span>
+                    </div>
+                    <div>
+                        <div class="admin-kpi-label">Active Requests</div>
+                        <h3 class="admin-kpi-value urgent-value">@Model.ActiveRequests</h3>
+                    </div>
+                </div>
+
+                <!-- Available Donors -->
+                <div class="admin-kpi-card">
+                    <div class="admin-kpi-card-header">
+                        <i class="fas fa-user-check admin-kpi-card-icon"></i>
+                        <span class="admin-kpi-badge green">82%</span>
+                    </div>
+                    <div>
+                        <div class="admin-kpi-label">Available Donors</div>
+                        <h3 class="admin-kpi-value">@Model.AvailableDonors.ToString("N0")</h3>
+                    </div>
+                </div>
+
+                <!-- Verified Users -->
+                <div class="admin-kpi-card">
+                    <div class="admin-kpi-card-header">
+                        <i class="fas fa-user-shield admin-kpi-card-icon"></i>
+                        <span class="admin-kpi-badge orange">Pending</span>
+                    </div>
+                    <div>
+                        <div class="admin-kpi-label">Verified Users</div>
+                        <h3 class="admin-kpi-value">@Model.VerifiedUsers.ToString("N0")</h3>
+                    </div>
+                </div>
+
+                <!-- Donations Done -->
+                <div class="admin-kpi-card">
+                    <div class="admin-kpi-card-header">
+                        <i class="fas fa-circle-check admin-kpi-card-icon"></i>
+                        <span class="admin-kpi-badge green">+12</span>
+                    </div>
+                    <div>
+                        <div class="admin-kpi-label">Donations Done</div>
+                        <h3 class="admin-kpi-value">@Model.DonationsDone.ToString("N0")</h3>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Blood Group Distribution Chart -->
+            <div class="admin-panel-card">
+                <div class="admin-panel-header">
+                    <h2 class="admin-panel-title">Blood Group Distribution</h2>
+                </div>
+                
+                <!-- Custom CSS Column Chart -->
+                <div class="chart-container">
+                    @foreach (var item in Model.BloodGroupDistribution)
+                    {
+                        var percentage = Model.ChartPercentages.ContainsKey(item.Key) ? Model.ChartPercentages[item.Key] : 0.0;
+                        
+                        <div class="chart-bar-wrapper">
+                            <div class="chart-bar" style="height: @percentage%;">
+                                <span class="chart-bar-value">@item.Value</span>
+                            </div>
+                            <span class="chart-bar-label">@item.Key</span>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <!-- Row for Verification Queue and Live Feed -->
+            <div class="admin-grid-two-cols">
+                
+                <!-- Verification Queue table -->
+                <div class="admin-panel-card">
+                    <div class="admin-panel-header">
+                        <h2 class="admin-panel-title">Verification Queue</h2>
+                        <button class="btn btn-link text-muted p-0"><i class="fas fa-sliders"></i></button>
+                    </div>
+                    <p class="text-muted mb-4" style="font-size: 0.85rem; margin-top: -10px;">
+                        @(Model.VerificationQueue.Count(q => q.DonorId > 0)) pending CNIC/Medical certifications await approval
+                    </p>
+
+                    <div class="table-responsive">
+                        <table class="queue-table">
+                            <thead>
+                                <tr>
+                                    <th>User</th>
+                                    <th>Document Type</th>
+                                    <th>Submission Date</th>
+                                    <th style="text-align: right;">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var item in Model.VerificationQueue)
+                                {
+                                    var initials = "";
+                                    if (!string.IsNullOrEmpty(item.FullName))
+                                    {
+                                        var parts = item.FullName.Split(' ');
+                                        initials = parts.Length > 1 ? $"{parts[0][0]}{parts[1][0]}" : $"{parts[0][0]}";
+                                    }
+                                    
+                                    <tr>
+                                        <td>
+                                            <div class="queue-user-block">
+                                                <div class="queue-user-avatar">@initials</div>
+                                                <div>
+                                                    <h4 class="queue-user-name">@item.FullName</h4>
+                                                    <p class="queue-user-email">@item.Email</p>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>@item.DocumentType</td>
+                                        <td>@item.SubmissionDate</td>
+                                        <td style="text-align: right; white-space: nowrap;">
+                                            <button class="btn btn-outline-info btn-sm me-1" data-bs-toggle="modal" data-bs-target="#previewModal-@item.DonorId">
+                                                <i class="fas fa-eye"></i> Preview
+                                            </button>
+                                            <form method="post" asp-page-handler="VerifyDonor" class="d-inline">
+                                                <input type="hidden" name="donorId" value="@item.DonorId" />
+                                                <button type="submit" class="btn btn-approve btn-sm"><i class="fas fa-check"></i></button>
+                                            </form>
+                                            <form method="post" asp-page-handler="RejectDonor" class="d-inline" onsubmit="return confirm('Reject verification for @item.FullName?');">
+                                                <input type="hidden" name="donorId" value="@item.DonorId" />
+                                                <button type="submit" class="btn btn-outline-danger btn-sm"><i class="fas fa-times"></i></button>
+                                            </form>
+                                        </td>
+                                    </tr>
+
+                                    <!-- Profile Preview Modal -->
+                                    <div class="modal fade" id="previewModal-@item.DonorId" tabindex="-1" aria-hidden="true">
+                                        <div class="modal-dialog modal-lg text-dark">
+                                            <div class="modal-content">
+                                                <div class="modal-header">
+                                                    <h5 class="modal-title">Donor Profile Preview - @item.FullName</h5>
+                                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                </div>
+                                                <div class="modal-body">
+                                                    <div class="row g-3">
+                                                        <div class="col-md-6">
+                                                            <label class="fw-bold text-muted small">Full Name</label>
+                                                            <p>@item.FullName</p>
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <label class="fw-bold text-muted small">Email</label>
+                                                            <p>@item.Email</p>
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <label class="fw-bold text-muted small">Phone</label>
+                                                            <p>@item.Phone</p>
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <label class="fw-bold text-muted small">CNIC</label>
+                                                            <p>@item.Cnic</p>
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <label class="fw-bold text-muted small">Blood Group</label>
+                                                            <p><span class="badge bg-danger">@item.BloodGroup</span></p>
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <label class="fw-bold text-muted small">Gender</label>
+                                                            <p>@item.Gender</p>
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <label class="fw-bold text-muted small">Date of Birth</label>
+                                                            <p>@(item.DateOfBirth?.ToString("MMM dd, yyyy") ?? "N/A")</p>
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <label class="fw-bold text-muted small">City</label>
+                                                            <p>@item.CityName</p>
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <label class="fw-bold text-muted small">Availability</label>
+                                                            <p>@item.Availability</p>
+                                                        </div>
+                                                        <div class="col-12">
+                                                            <label class="fw-bold text-muted small">Document Type</label>
+                                                            <p>@item.DocumentType</p>
+                                                        </div>
+                                                        <div class="col-12">
+                                                            <label class="fw-bold text-muted small">Submission Date</label>
+                                                            <p>@item.SubmissionDate</p>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="modal-footer">
+                                                    <form method="post" asp-page-handler="RejectDonor" class="d-inline">
+                                                        <input type="hidden" name="donorId" value="@item.DonorId" />
+                                                        <button type="submit" class="btn btn-danger"><i class="fas fa-times me-1"></i> Reject</button>
+                                                    </form>
+                                                    <form method="post" asp-page-handler="VerifyDonor" class="d-inline">
+                                                        <input type="hidden" name="donorId" value="@item.DonorId" />
+                                                        <button type="submit" class="btn btn-success"><i class="fas fa-check me-1"></i> Approve</button>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Live Feed Timeline -->
+                <div class="admin-panel-card">
+                    <div class="live-feed-header">
+                        <h2 class="admin-panel-title">Live Feed</h2>
+                        <span class="live-feed-status"></span>
+                    </div>
+                    
+                    <div class="timeline">
+                        @foreach (var feed in Model.SystemLiveFeed)
+                        {
+                            <div class="timeline-item">
+                                <span class="timeline-dot @feed.ColorClass"></span>
+                                <div class="timeline-time">@feed.Time</div>
+                                <h4 class="timeline-title">@feed.Title</h4>
+                                <p class="timeline-desc">@feed.Description</p>
+                            </div>
+                        }
+                        
+                        <a href="#" class="timeline-footer-link">View All System Logs</a>
+                    </div>
+                </div>
+            </div>
+        }
+
+    </main>
+
+    <!-- Reusable Confirm Delete Modal -->
+    <div class="modal fade text-dark" id="confirmDeleteModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow" style="border-radius:16px;">
+                <div class="modal-header border-0 pb-0">
+                    <h5 class="modal-title text-danger"><i class="fas fa-trash me-2"></i>Confirm Delete</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body py-4">
+                    <p class="text-muted mb-3">You are about to permanently delete <strong id="confirmDeleteName"></strong>. This <strong>cannot</strong> be undone.</p>
+                    <div class="alert alert-danger">
+                        <i class="fas fa-info-circle me-2"></i> Type <strong>DELETE</strong> to confirm.
+                    </div>
+                    <input type="text" id="confirmDeleteInput" class="form-control" placeholder="Type DELETE here" autocomplete="off" />
+                </div>
+                <div class="modal-footer border-0 pt-0">
+                    <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Cancel</button>
+                    <form method="post" id="confirmDeleteForm" style="display:inline;">
+                        <input type="hidden" name="deleteDonorId" id="confirmDeleteId" value="" />
+                        <button type="submit" class="btn btn-danger rounded-pill px-4" id="confirmDeleteBtn" disabled>Permanently Delete</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap Bundle JS -->
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Setup confirm delete modal
+            var confirmModal = document.getElementById('confirmDeleteModal');
+            if (confirmModal) {
+                confirmModal.addEventListener('show.bs.modal', function (event) {
+                    var button = event.relatedTarget;
+                    var id = button.getAttribute('data-delete-id');
+                    var name = button.getAttribute('data-delete-name');
+                    var handler = button.getAttribute('data-delete-handler');
+
+                    document.getElementById('confirmDeleteName').textContent = name;
+                    document.getElementById('confirmDeleteId').value = id;
+
+                    // Set the form action based on handler
+                    var page = window.location.pathname.toLowerCase();
+                    var form = document.getElementById('confirmDeleteForm');
+                    var pageHandler = 'DeleteDonor';
+                    if (handler === 'DeletePatient') {
+                        form.querySelector('input[name="deleteDonorId"]').name = 'deletePatientId';
+                    } else if (handler === 'DeleteUser') {
+                        form.querySelector('input[name="deleteDonorId"]').name = 'deleteUserId';
+                    } else {
+                        form.querySelector('input[name="deleteDonorId"]').name = 'deleteDonorId';
+                    }
+                    form.action = page + '?handler=' + handler;
+                });
+
+                var input = document.getElementById('confirmDeleteInput');
+                var btn = document.getElementById('confirmDeleteBtn');
+                if (input && btn) {
+                    input.addEventListener('input', function () {
+                        btn.disabled = this.value !== 'DELETE';
+                    });
+                    confirmModal.addEventListener('hidden.bs.modal', function () {
+                        input.value = '';
+                        btn.disabled = true;
+                    });
+                }
+            }
+        });
+    </script>
+</body>
+</html>

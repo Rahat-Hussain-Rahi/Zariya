@@ -1,0 +1,118 @@
+@page
+@model Zariya.Pages.Requests.CreateModel
+@{
+    ViewData["Title"] = "New Blood Request";
+    Layout = "_Layout";
+}
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-danger text-white py-3">
+                    <h4 class="mb-0"><i class="fas fa-tint me-2"></i>New Blood Request</h4>
+                </div>
+                <div class="card-body p-4">
+
+                    @if (!string.IsNullOrEmpty(Model.SuccessMessage))
+                    {
+                        <div class="alert alert-success alert-dismissible fade show" role="alert">
+                            <i class="fas fa-check-circle me-2"></i>@Model.SuccessMessage
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    }
+
+                    @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+                    {
+                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            <i class="fas fa-exclamation-circle me-2"></i>@Model.ErrorMessage
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    }
+
+                    @if (Model.IsPatient && Model.CurrentPatient != null)
+                    {
+                        <div class="alert alert-info">
+                            <i class="fas fa-user me-2"></i>
+                            Creating request for <strong>@Model.CurrentPatient.FullName</strong>
+                            @if (Model.CurrentPatient.City != null)
+                            {
+                                <span class="ms-2">(@Model.CurrentPatient.City.CityName)</span>
+                            }
+                        </div>
+                    }
+
+                    <form method="post">
+                        @if (!Model.IsPatient)
+                        {
+                            <div class="alert alert-warning">
+                                <i class="fas fa-info-circle me-2"></i>
+                                You are creating a request on behalf of a patient. Please provide their details.
+                            </div>
+
+                            <h5 class="text-muted mb-3"><i class="fas fa-user-injured me-2"></i>Patient Details</h5>
+                            <div class="row g-3 mb-4">
+                                <div class="col-md-6">
+                                    <label class="form-label">Full Name <span class="text-danger">*</span></label>
+                                    <input type="text" name="PatientName" class="form-control" value="@Model.PatientName" required />
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Phone</label>
+                                    <input type="text" name="PatientPhone" class="form-control" value="@Model.PatientPhone" />
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">City <span class="text-danger">*</span></label>
+                                    <select name="PatientCityId" class="form-select" required>
+                                        <option value="">-- Select City --</option>
+                                        @foreach (var city in Model.CitiesList)
+                                        {
+                                            <option value="@city.CityId" selected="@(city.CityId == Model.PatientCityId)">@city.CityName</option>
+                                        }
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Medical Condition</label>
+                                    <input type="text" name="PatientMedicalCondition" class="form-control" value="@Model.PatientMedicalCondition" placeholder="e.g. Thalassemia, Surgery" />
+                                </div>
+                            </div>
+                            <hr class="my-4" />
+                        }
+
+                        <h5 class="text-muted mb-3"><i class="fas fa-tint me-2"></i>Request Details</h5>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Blood Group Needed <span class="text-danger">*</span></label>
+                                <select name="BloodGroupNeeded" class="form-select" required>
+                                    <option value="">-- Select Blood Group --</option>
+                                    @foreach (var bg in Model.BloodGroups)
+                                    {
+                                        <option value="@bg" selected="@(bg == Model.BloodGroupNeeded)">@bg</option>
+                                    }
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Urgency <span class="text-danger">*</span></label>
+                                <select name="Urgency" class="form-select" required>
+                                    <option value="normal" selected="@(Model.Urgency == "normal")">Normal</option>
+                                    <option value="urgent" selected="@(Model.Urgency == "urgent")">Urgent</option>
+                                    <option value="critical" selected="@(Model.Urgency == "critical")">Critical</option>
+                                </select>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label">Additional Message</label>
+                                <textarea name="Message" class="form-control" rows="3" placeholder="Describe the requirement, any special instructions, or hospital details.">@Model.Message</textarea>
+                            </div>
+                        </div>
+
+                        <div class="mt-4 d-flex gap-2">
+                            <button type="submit" class="btn btn-danger px-4">
+                                <i class="fas fa-paper-plane me-1"></i> Submit Request
+                            </button>
+                            <a href="javascript:history.back()" class="btn btn-outline-secondary px-4">Cancel</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

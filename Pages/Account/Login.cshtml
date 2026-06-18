@@ -1,0 +1,50 @@
+@page
+@model Zariya.Pages.Account.LoginModel
+@{
+    ViewData["Title"] = "Login - Zariya";
+}
+<div class="container py-5 d-flex align-items-center justify-content-center" style="min-height: 70vh;">
+    <div class="card border-0 shadow-lg p-4 w-100" style="max-width: 450px; border-radius: var(--radius-md);">
+        <div class="text-center mb-4">
+            <img src="~/images/logo.png" alt="Zariya Logo" style="height: 60px; margin-bottom: 10px;" onerror="this.style.display='none';" />
+            <h2 class="h3 fw-bold m-0"><span class="text-primary-custom">Zariya</span> Portal Login</h2>
+            <p class="text-muted mt-2">Enter your email and password to access your dashboard</p>
+        </div>
+        @if (!string.IsNullOrEmpty(Model.SuccessMessage))
+        {
+            <div class="alert alert-success" role="alert">
+                <i class="fas fa-check-circle me-2"></i> @Model.SuccessMessage
+            </div>
+        }
+        @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+        {
+            <div class="alert alert-danger" role="alert">
+                <i class="fas fa-exclamation-triangle me-2"></i> @Model.ErrorMessage
+            </div>
+        }
+        <form method="post">
+            <input type="hidden" name="ReturnUrl" value="@Model.ReturnUrl" />
+            <div class="form-group-custom">
+                <label for="email">Email Address</label>
+                <input type="email" id="email" asp-for="Email" class="form-control-custom" placeholder="email@example.com" required />
+            </div>
+            <div class="form-group-custom">
+                <label for="password">Password</label>
+                <input type="password" id="password" asp-for="Password" class="form-control-custom" placeholder="••••••••" required />
+            </div>
+            <div class="d-flex justify-content-between align-items-center mb-4" style="font-size: 0.85rem;">
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="rememberMe">
+                    <label class="form-check-label text-muted" for="rememberMe">
+                        Remember me
+                    </label>
+                </div>
+                <a href="#" class="text-danger fw-bold text-decoration-none">Forgot Password?</a>
+            </div>
+            <button type="submit" class="btn btn-primary-custom w-100 py-3"><i class="fas fa-sign-in-alt me-1"></i> Sign In</button>
+     
+            <p class="text-muted text-center mt-4 mb-0">Don't have an account? Register as <a asp-page="/Account/RegisterDonor" class="text-danger fw-bold">Become a Donor</a> or <a asp-page="/Account/RegisterRecipient" class="text-danger fw-bold">Recipient</a></p>
+        </form>
+      
+    </div>
+</div>

@@ -1,0 +1,48 @@
+@page "{id:int}"
+@model Zariya.Pages.Requests.DetailsModel
+@{
+    ViewData["Title"] = "Blood Request Details";
+}
+
+@if (Model.BloodRequest != null)
+{
+    <div class="container py-5">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body p-4">
+                <div class="d-flex justify-content-between align-items-start gap-3 flex-wrap">
+                    <div>
+                        <h1 class="h3 fw-bold">Emergency blood is needed</h1>
+                        <p class="text-muted mb-0">@Model.BloodRequest.CreatedAt.ToString("MMM dd, yyyy - hh:mm tt")</p>
+                    </div>
+                    <span class="badge bg-danger fs-6">@Model.BloodRequest.BloodGroupNeeded</span>
+                </div>
+                <hr />
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <div class="text-muted small">Requester</div>
+                        <div class="fw-semibold">@Model.BloodRequest.Patient.FullName</div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="text-muted small">City</div>
+                        <div class="fw-semibold">@(Model.BloodRequest.Patient.City?.CityName ?? "City not listed")</div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="text-muted small">Phone</div>
+                        <div class="fw-semibold">@Model.BloodRequest.Patient.Phone</div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="text-muted small">Urgency</div>
+                        <div class="fw-semibold text-capitalize">@Model.BloodRequest.Urgency</div>
+                    </div>
+                </div>
+                <p class="mt-4 mb-0">@Model.BloodRequest.Message</p>
+                @if (Model.BloodRequest.Donor != null)
+                {
+                    <div class="alert alert-success mt-4 mb-0">
+                        Accepted by @Model.BloodRequest.Donor.FullName.
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+}

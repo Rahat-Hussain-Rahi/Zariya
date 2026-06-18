@@ -1,0 +1,52 @@
+@page
+@{
+    ViewData["Title"] = "FAQ";
+}
+
+<section class="results-header text-center">
+    <div class="container">
+        <h1 class="display-5 fw-bold">Frequently Asked Questions</h1>
+        <p class="lead text-muted">Answers to common questions about using Zariya.</p>
+    </div>
+</section>
+
+<div class="container py-5">
+    <div class="accordion" id="faqAccordion">
+        <div class="accordion-item">
+            <h2 class="accordion-header" id="faqOneHeading">
+                <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#faqOne" aria-expanded="true" aria-controls="faqOne">
+                    Do I need to log in to request a donor?
+                </button>
+            </h2>
+            <div id="faqOne" class="accordion-collapse collapse show" aria-labelledby="faqOneHeading" data-bs-parent="#faqAccordion">
+                <div class="accordion-body">
+                    Yes. Donor contact details are protected, so you must log in before viewing or contacting a donor.
+                </div>
+            </div>
+        </div>
+        <div class="accordion-item">
+            <h2 class="accordion-header" id="faqTwoHeading">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faqTwo" aria-expanded="false" aria-controls="faqTwo">
+                    Can donors update their availability?
+                </button>
+            </h2>
+            <div id="faqTwo" class="accordion-collapse collapse" aria-labelledby="faqTwoHeading" data-bs-parent="#faqAccordion">
+                <div class="accordion-body">
+                    Yes. Donors can change their availability from the donor dashboard at any time.
+                </div>
+            </div>
+        </div>
+        <div class="accordion-item">
+            <h2 class="accordion-header" id="faqThreeHeading">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faqThree" aria-expanded="false" aria-controls="faqThree">
+                    Can I delete my account?
+                </button>
+            </h2>
+            <div id="faqThree" class="accordion-collapse collapse" aria-labelledby="faqThreeHeading" data-bs-parent="#faqAccordion">
+                <div class="accordion-body">
+                    Yes. Donors and recipients can delete their own account from their dashboard after confirming the warning prompt.
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

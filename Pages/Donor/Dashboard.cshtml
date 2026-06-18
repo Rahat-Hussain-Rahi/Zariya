@@ -1,0 +1,480 @@
+@page
+@model Zariya.Pages.DonorDashboardModel
+@{
+    Layout = null; // Bypass public layout to render high-fidelity dashboard viewport
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Donor Dashboard - Zariya</title>
+    <!-- Bootstrap CSS -->
+    <a href="d:\liⴆɾaɾყ\courses\6th semester\enterprise system\projects\zariya\pages\donor\dashboard.cshtml.cs">d:\liⴆɾaɾყ\courses\6th semester\enterprise system\projects\zariya\pages\donor\dashboard.cshtml.cs</a>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+</head>
+<body class="dashboard-page">
+
+    @if (Model.DonorProfile == null)
+    {
+        <div class="container py-5 text-center">
+            <div class="card border-0 shadow-sm p-5">
+                <i class="fas fa-user-slash fa-3x text-muted mb-3"></i>
+                <h3>No Donor Profile Found</h3>
+                <p class="text-muted font-semibold">Please register or log in as a donor to view this page.</p>
+                <div class="mt-3">
+                    <a asp-page="/Account/Login" class="btn btn-danger">Log In</a>
+                </div>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="dashboard-container">
+            <!-- Sidebar Nav -->
+            <aside class="dashboard-sidebar">
+                <div>
+                    <div class="sidebar-brand">
+                        <h3>Zariya Portal</h3>
+                        <p>Healthcare Command Center</p>
+                    </div>
+                    <nav class="sidebar-menu">
+                        <a href="?tab=" class="sidebar-link @(Model.Tab != "settings" ? "active" : "")">
+                            <i class="fas fa-th-large"></i> Dashboard
+                        </a>
+            
+                        <a asp-page="/Donors/Search" class="sidebar-link">
+                            <i class="fas fa-map-marker-alt"></i> Match Finder
+                        </a>
+                        <a asp-page="/Requests/Create" class="sidebar-link">
+                            <i class="fas fa-plus-circle"></i> New Request
+                        </a>
+                        <a href="?tab=settings" class="sidebar-link @(Model.Tab == "settings" ? "active" : "")">
+                            <i class="fas fa-cog"></i> Settings
+                        </a>
+                    </nav>
+                </div>
+                
+                <div class="sidebar-footer">
+                    <div class="sidebar-user-info">
+                        <img src="@(string.IsNullOrEmpty(Model.DonorProfile.ProfilePhoto) ? "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&q=80&w=150" : Model.DonorProfile.ProfilePhoto)" 
+                             class="sidebar-user-avatar" 
+                             alt="@Model.DonorProfile.FullName" 
+                             onerror="this.src='https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&q=80&w=150';" />
+                        <div>
+                            <h5 class="sidebar-user-name">@Model.DonorProfile.FullName</h5>
+                            <span class="sidebar-user-group">@Model.DonorProfile.BloodGroup Positive</span>
+                        </div>
+                    </div>
+                    <button type="button" class="btn btn-outline-danger btn-sm mt-3 w-100" data-bs-toggle="modal" data-bs-target="#deleteAccountModal">
+                        <i class="fas fa-triangle-exclamation me-1"></i> Delete My Account
+                    </button>
+                </div>
+            </aside>
+
+            <!-- Main Content Area -->
+            @if (Model.Tab == "settings")
+            {
+                <main class="dashboard-content">
+                    <div class="p-4 w-100">
+                        @await Html.PartialAsync("_SettingsPartial")
+                    </div>
+                </main>
+            }
+            else
+            {
+            <main class="dashboard-content">
+                <!-- Top Header -->
+                <header class="dashboard-top-header">
+                    <div class="dashboard-title-area">
+                        <h2>Welcome back, @Model.DonorProfile.FullName.Split(' ')[0]</h2>
+                        <p>Your contribution has saved @Model.DonorProfile.TotalDonations lives this year.</p>
+                    </div>
+                    <div class="dashboard-header-right">
+                        <span class="last-donation-badge">Last donation: @Model.DaysSinceLastDonation days ago</span>
+                        <div class="dropdown">
+                            <button class="btn notification-bell-dropdown" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="fas fa-bell"></i>
+                                @if (Model.MatchingRequests.Count > 0)
+                                {
+                                    <span class="notification-badge-red">@Model.MatchingRequests.Count</span>
+                                }
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end shadow-sm notification-dropdown-menu" style="width:360px; max-height:420px; overflow-y:auto; border-radius:12px;">
+                                @if (Model.MatchingRequests.Count == 0)
+                                {
+                                    <li class="dropdown-item-text text-center text-muted py-4">
+                                        <i class="fas fa-check-circle fa-2x mb-2 d-block"></i>
+                                        No new notifications
+                                    </li>
+                                }
+                                else
+                                {
+                                    @foreach (var n in Model.MatchingRequests)
+                                    {
+                                        <li class="notification-item">
+                                            <div class="d-flex align-items-start gap-2 px-3 py-2">
+                                                <div class="bg-danger text-white rounded-circle d-flex align-items-center justify-content-center" style="min-width:40px;height:40px;font-weight:700;font-size:0.85rem;">
+                                                    @n.BloodGroupNeeded
+                                                </div>
+                                                <div class="flex-grow-1" style="font-size:0.85rem;">
+                                                    <strong>@n.Patient?.FullName</strong><br />
+                                                    <small class="text-muted">@n.Patient?.City?.CityName &middot; @n.Urgency</small>
+                                                </div>
+                                                <div class="d-flex gap-1">
+                                                    <form method="post" asp-page-handler="AcceptRequest" style="display:inline;">
+                                                        <input type="hidden" name="requestId" value="@n.RequestId" />
+                                                        <button type="submit" class="btn btn-sm btn-success rounded-circle" title="Accept" style="width:32px;height:32px;"><i class="fas fa-check"></i></button>
+                                                    </form>
+                                                    <form method="post" asp-page-handler="DeclineRequest" style="display:inline;">
+                                                        <input type="hidden" name="requestId" value="@n.RequestId" />
+                                                        <button type="submit" class="btn btn-sm btn-outline-danger rounded-circle" title="Reject" style="width:32px;height:32px;"><i class="fas fa-times"></i></button>
+                                                    </form>
+                                                    <button type="button" class="btn btn-sm btn-outline-warning rounded-circle" title="Report Fake" style="width:32px;height:32px;" data-bs-toggle="modal" data-bs-target="#reportRequestModal-@n.RequestId"><i class="fas fa-flag"></i></button>
+                                                </div>
+                                            </div>
+                                        </li>
+                                    }
+                                }
+                            </ul>
+                        </div>
+                        <form method="post" asp-page="/Account/Login" asp-page-handler="Logout" class="d-inline">
+                            <button type="submit" class="btn btn-outline-danger btn-sm rounded-pill px-3 py-1.5 font-bold"><i class="fas fa-sign-out-alt me-1"></i> Logout</button>
+                        </form>
+                    </div>
+                </header>
+
+                @if (!string.IsNullOrEmpty(Model.SuccessMessage))
+                {
+                    <div class="alert alert-success alert-dismissible fade show mb-4 border-0 shadow-sm" role="alert" style="border-radius: 12px;">
+                        <i class="fas fa-check-circle me-2"></i> @Model.SuccessMessage
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                }
+
+                <!-- Availability Banner Switch -->
+                <div class="availability-banner-card @(Model.DonorProfile.Availability == "Available" ? "" : "unavailable") shadow-sm">
+                    <div class="availability-status-info">
+                        <div class="status-icon-circle">
+                            <i class="fas @(Model.DonorProfile.Availability == "Available" ? "fa-check" : "fa-ban")"></i>
+                        </div>
+                        <div>
+                            <h4 class="status-text-title">Your Current Status: @(Model.DonorProfile.Availability?.ToUpper() ?? "AVAILABLE")</h4>
+                            <p class="status-text-subtitle">Hospitals can contact you for emergency requests in @(Model.DonorProfile.City?.CityName ?? "Dhaka").</p>
+                        </div>
+                    </div>
+                    <div>
+                        <form method="post" asp-page-handler="ToggleAvailability" id="toggleAvailabilityForm">
+                            <label class="custom-switch" style="width: 54px; height: 30px;">
+                                <input type="checkbox" @(Model.DonorProfile.Availability == "Available" ? "checked" : "") onchange="document.getElementById('toggleAvailabilityForm').submit();" />
+                                <span class="switch-slider" style="border-radius: 34px;"></span>
+                            </label>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Stats Cards Row -->
+                <div class="dashboard-stats-grid">
+                    <div class="stat-dashboard-card shadow-sm">
+                        <div>
+                            <i class="fas fa-envelope-open-text stat-card-icon blue"></i>
+                            <div class="stat-card-label">Requests Received</div>
+                        </div>
+                        <div class="stat-card-number">24</div>
+                    </div>
+
+                    <div class="stat-dashboard-card shadow-sm">
+                        <div>
+                            <i class="fas fa-heart stat-card-icon red"></i>
+                            <div class="stat-card-label">Donations Completed</div>
+                        </div>
+                        <div class="stat-card-number">08</div>
+                    </div>
+
+                    <div class="stat-dashboard-card shadow-sm">
+                        <div>
+                            <i class="fas fa-hand-holding-heart stat-card-icon green"></i>
+                            <div class="stat-card-label">Lives Helped</div>
+                        </div>
+                        <div class="stat-card-number">@Model.DonorProfile.TotalDonations.ToString("D2")</div>
+                    </div>
+
+                    <!-- Next Eligibility circular loader -->
+                    <div class="eligibility-stat-card shadow-sm">
+                        @{
+                            // Gap of 90 days between donations. Circle perimeter is 251.2 (radius 40)
+                            var pct = Model.EligibilityRemainingDays > 0 ? (90 - Model.EligibilityRemainingDays) * 100 / 90 : 100;
+                            var dashoffset = 251.2 - (251.2 * pct / 100);
+                        }
+                        <div class="eligibility-circular-container">
+                            <svg class="eligibility-circular-svg">
+                                <circle class="circular-bg-path" cx="45" cy="45" r="40"></circle>
+                                <circle class="circular-indicator-path" cx="45" cy="45" r="40" style="stroke-dashoffset: @dashoffset;"></circle>
+                            </svg>
+                            <div class="circular-text-overlay">
+                                <span class="circular-text-num">@(Model.EligibilityRemainingDays > 0 ? Model.EligibilityRemainingDays.ToString() : "Eligible")</span>
+                                @if (Model.EligibilityRemainingDays > 0)
+                                {
+                                    <div class="circular-text-unit">Days Left</div>
+                                }
+                            </div>
+                        </div>
+                        <div class="eligibility-info-text">
+                            <p class="eligibility-msg">You are eligible to donate again on</p>
+                            <div class="eligibility-date">@Model.NextEligibilityDate.ToString("MMM dd, yyyy")</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Emergency Nearby Requests -->
+                <div class="row g-4">
+                    <div class="col-lg-12">
+                        <div class="emergency-list-header">
+                            <h3>Emergency Nearby Requests</h3>
+                            <a asp-page="/Donors/Search" class="emergency-view-all">View All</a>
+                        </div>
+
+                        @if (Model.MatchingRequests.Count == 0)
+                        {
+                            <div class="card border-0 shadow-sm p-5 text-center" style="border-radius: 16px;">
+                                <i class="fas fa-heart-circle-check fa-3x text-muted opacity-50 mb-3"></i>
+                                <h5 class="text-dark font-bold">All caught up!</h5>
+                                <p class="text-muted font-semibold m-0">No pending requests matching your blood group in your location.</p>
+                            </div>
+                        }
+                        else
+                        {
+                            @for (int i = 0; i < Model.MatchingRequests.Count; i++)
+                            {
+                                var request = Model.MatchingRequests[i];
+                                // Mock distances and urgency tags for demonstration based on request properties
+                                var mockDistance = (1.5 + (i * 1.3)).ToString("0.0");
+                                var isCritical = i % 2 == 0;
+                                
+                                <div class="emergency-item-card shadow-sm">
+                                    <div class="emergency-left-info">
+                                        <div class="emergency-blood-badge-large">@request.BloodGroupNeeded</div>
+                                        <div>
+                                            <div>
+                                                <span class="emergency-urgency-badge @(isCritical ? "urgency-critical" : "urgency-high")">
+                                                    @(isCritical ? "Critical Urgency" : "High Urgency")
+                                                </span>
+                                                <span class="emergency-location-tag">
+                                                    <i class="fas fa-location-arrow me-1"></i> @mockDistance km away
+                                                </span>
+                                            </div>
+                                            <h4 class="emergency-hospital-name">
+                                                <a href="javascript:void(0)" class="text-decoration-none text-dark" data-bs-toggle="modal" data-bs-target="#requestDetailModal-@request.RequestId">@(request.Patient?.FullName ?? "Emergency Recipient")</a>
+                                            </h4>
+                                            <p class="emergency-detail-desc">Request for 1-2 units of blood. Patient is located at @(request.Patient?.City?.CityName ?? "Local Hospital").</p>
+                                        </div>
+                                    </div>
+                                    <div class="emergency-actions">
+                                        <a href="javascript:void(0)" class="btn-emergency-view" data-bs-toggle="modal" data-bs-target="#requestDetailModal-@request.RequestId">View Details</a>
+                                        <form method="post" asp-page-handler="AcceptRequest" style="display:inline;">
+                                            <input type="hidden" name="requestId" value="@request.RequestId" />
+                                            <button type="submit" class="btn-emergency-accept">Accept Request</button>
+                                        </form>
+                                        <button type="button" class="btn btn-sm btn-outline-warning mt-1" data-bs-toggle="modal" data-bs-target="#reportRequestModal-@request.RequestId">
+                                            <i class="fas fa-flag me-1"></i> Report
+                                        </button>
+                                    </div>
+                                </div>
+                            }
+                        }
+                    </div>
+
+                </div>
+            </main>
+            }
+
+        </div>
+
+        @if (Model.Tab != "settings")
+        {
+        @foreach (var request in Model.MatchingRequests)
+        {
+            <!-- Request Detail Modal -->
+            <div class="modal fade text-dark" id="requestDetailModal-@request.RequestId" tabindex="-1" aria-hidden="true">
+                <div class="modal-dialog modal-lg modal-dialog-centered">
+                    <div class="modal-content border-0 shadow" style="border-radius:16px;">
+                        <div class="modal-header border-0 pb-0">
+                            <h5 class="modal-title fw-bold">
+                                <span class="badge bg-danger me-2" style="font-size:1rem;">@request.BloodGroupNeeded</span>
+                                Emergency Blood Request
+                            </h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body py-4">
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <div class="text-muted small text-uppercase" style="font-size:0.75rem;">Patient Name</div>
+                                    <div class="fw-semibold">@request.Patient?.FullName</div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="text-muted small text-uppercase" style="font-size:0.75rem;">Blood Group Needed</div>
+                                    <div class="fw-semibold">@request.BloodGroupNeeded</div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="text-muted small text-uppercase" style="font-size:0.75rem;">City</div>
+                                    <div class="fw-semibold">@(request.Patient?.City?.CityName ?? "City not listed")</div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="text-muted small text-uppercase" style="font-size:0.75rem;">Phone</div>
+                                    <div class="fw-semibold">@(request.Patient?.Phone ?? "N/A")</div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="text-muted small text-uppercase" style="font-size:0.75rem;">Urgency</div>
+                                    <div class="fw-semibold text-capitalize">@request.Urgency</div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="text-muted small text-uppercase" style="font-size:0.75rem;">Requested On</div>
+                                    <div class="fw-semibold">@request.CreatedAt.ToString("MMM dd, yyyy - hh:mm tt")</div>
+                                </div>
+                                @if (!string.IsNullOrEmpty(request.Message))
+                                {
+                                    <div class="col-12">
+                                        <div class="text-muted small text-uppercase" style="font-size:0.75rem;">Message</div>
+                                        <p class="mb-0 mt-1">@request.Message</p>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                        <div class="modal-footer border-0 pt-0">
+                            <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Close</button>
+                            <form method="post" asp-page-handler="AcceptRequest" style="display:inline;">
+                                <input type="hidden" name="requestId" value="@request.RequestId" />
+                                <button type="submit" class="btn btn-danger rounded-pill px-4"><i class="fas fa-check me-1"></i> Accept Request</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Report Request Modal -->
+            <div class="modal fade" id="reportRequestModal-@request.RequestId" tabindex="-1" aria-labelledby="reportRequestModalLabel-@request.RequestId" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content border-0 shadow" style="border-radius:16px;">
+                        <form method="post" asp-page-handler="ReportRequest">
+                            <input type="hidden" name="requestId" value="@request.RequestId" />
+                            <input type="hidden" name="reportedPatientId" value="@request.PatientId" />
+                            <div class="modal-header border-0 pb-0">
+                                <h5 class="modal-title text-warning" id="reportRequestModalLabel-@request.RequestId"><i class="fas fa-flag me-2"></i>Report Fake Request</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body py-4">
+                                <p class="text-muted mb-3">Reporting request from <strong>@request.Patient?.FullName</strong> as potentially fake.</p>
+                                <div class="mb-3">
+                                    <label class="form-label fw-semibold">Reason</label>
+                                    <select name="reason" class="form-select" required>
+                                        <option value="">Select a reason</option>
+                                        <option value="Fake Request">Fake Blood Request</option>
+                                        <option value="Wrong Info">Incorrect Patient Info</option>
+                                        <option value="Harassment">Harassment or Misconduct</option>
+                                        <option value="Fraud">Fraudulent Activity</option>
+                                        <option value="Other">Other</option>
+                                    </select>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label fw-semibold">Description</label>
+                                    <textarea name="description" class="form-control" rows="4" placeholder="Describe the issue in detail..." required></textarea>
+                                </div>
+                            </div>
+                            <div class="modal-footer border-0 pt-0">
+                                <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Cancel</button>
+                                <button type="submit" class="btn btn-warning rounded-pill px-4">Submit Report</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        }
+
+        <!-- Delete Account Confirmation Modal -->
+        <div class="modal fade" id="deleteAccountModal" tabindex="-1" aria-labelledby="deleteAccountModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content border-0 shadow" style="border-radius:16px;">
+                    <div class="modal-header border-0 pb-0">
+                        <h5 class="modal-title font-bold text-danger" id="deleteAccountModalLabel"><i class="fas fa-triangle-exclamation me-2"></i>Delete Account</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body py-4">
+                        <p class="text-muted mb-3">This action <strong>cannot</strong> be undone. All your donor data, donations, and requests will be permanently removed.</p>
+                        <div class="alert alert-danger">
+                            <i class="fas fa-info-circle me-2"></i> Type <strong>DELETE</strong> to confirm.
+                        </div>
+                        <input type="text" id="deleteConfirmInput" class="form-control" placeholder="Type DELETE here" autocomplete="off" />
+                    </div>
+                    <div class="modal-footer border-0 pt-0">
+                        <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Cancel</button>
+                        <form method="post" asp-page-handler="DeleteAccount" id="deleteAccountForm" style="display:inline;">
+                            <button type="submit" class="btn btn-danger rounded-pill px-4" id="deleteConfirmBtn" disabled>Permanently Delete</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Edit Profile Details Modal -->
+        <div class="modal fade" id="updateProfileModal" tabindex="-1" aria-labelledby="updateProfileModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content border-0 shadow" style="border-radius:16px;">
+                    <form method="post" asp-page-handler="UpdateProfile">
+                        <div class="modal-header border-0 pb-0">
+                            <h5 class="modal-title font-bold text-dark" id="updateProfileModalLabel">Update Contact & Location Details</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body py-4">
+                            <div class="mb-3">
+                                <label class="form-label font-bold text-muted" style="font-size:0.8rem;">Phone Number</label>
+                                <input type="text" name="phone" class="form-control py-2" value="@Model.DonorProfile.Phone" required style="border-radius:8px;" />
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label font-bold text-muted" style="font-size:0.8rem;">City Location</label>
+                                <select name="cityId" class="form-select py-2" required style="border-radius:8px;">
+                                    @foreach (var city in Model.CitiesList)
+                                    {
+                                        <option value="@city.CityId" selected="@(Model.DonorProfile.CityId == city.CityId)">@city.CityName, @city.Province</option>
+                                    }
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label font-bold text-muted" style="font-size:0.8rem;">Bio (Brief Information)</label>
+                                <textarea name="bio" class="form-control" rows="3" placeholder="Tell us something about yourself..." style="border-radius:8px;">@Model.DonorProfile.Bio</textarea>
+                            </div>
+                        </div>
+                        <div class="modal-footer border-0 pt-0">
+                            <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Cancel</button>
+                            <button type="submit" class="btn btn-danger rounded-pill px-4">Save Updates</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        }
+
+    }
+
+    <!-- jQuery and Bootstrap Bundle JS -->
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            var input = document.getElementById('deleteConfirmInput');
+            var btn = document.getElementById('deleteConfirmBtn');
+            if (input && btn) {
+                input.addEventListener('input', function () {
+                    btn.disabled = this.value !== 'DELETE';
+                });
+            }
+        });
+    </script>
+</body>
+</html>

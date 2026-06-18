@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Zariya Digital Donor Portal</title>
+    
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/Zariya.styles.css" asp-append-version="true" />
+</head>
+<body>
+    <header>
+        <nav class="navbar navbar-expand-lg navbar-custom fixed-top">
+            <div class="container">
+                <a class="navbar-brand-custom" asp-page="/Index">
+                    <img src="~/images/logo.png" alt="Zariya Logo" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';" />
+                    <span style="display:none;" class="text-danger">Zariya</span>
+                </a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarCollapse">
+                    <ul class="navbar-nav mx-auto mb-2 mb-lg-0">
+                        <li class="nav-item">
+                            <a class="nav-link-custom" asp-page="/Index" style="text-decoration:none">Home</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link-custom" asp-page="/Donors/Search" style="text-decoration:none">Find Blood</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link-custom" asp-page="/Content/About" style="text-decoration:none">About Us</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link-custom" asp-page="/Content/Contact" style="text-decoration:none">Contact</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link-custom" asp-page="/Content/WhatWeDo" style="text-decoration:none">What We Do</a>
+                        </li>
+                    </ul>
+                    <div class="d-flex align-items-center gap-3">
+                        @if (Context.Session.GetString("UserEmail") != null)
+                        {
+                            var role = Context.Session.GetString("UserRole");
+                            var userName = Context.Session.GetString("UserName") ?? "User";
+                            var dashboardPath = "/Index";
+                            if (role == "admin") { dashboardPath = "/Admin/Dashboard"; }
+                            else if (role == "donor") { dashboardPath = "/Donor/Dashboard"; }
+                            else if (role == "patient" || role == "recipient") { dashboardPath = "/Recipient/Dashboard"; }
+
+                            <span class="text-dark me-2">Hi, <strong>@userName</strong></span>
+                            <a href="@dashboardPath" class="btn btn-primary-custom btn-sm">Dashboard</a>
+                            <a asp-page="/Settings/Index" class="btn btn-outline-secondary btn-sm ms-1"><i class="fas fa-cog"></i></a>
+                            <form method="post" asp-page="/Account/Login" asp-page-handler="Logout" class="d-inline">
+                                <button type="submit" class="btn btn-outline-danger btn-sm">Logout</button>
+                            </form>
+                        }
+                        else
+                        {
+                            <a asp-page="/Account/Login" class="nav-link-custom fw-bold" style="text-decoration:none">Login</a>
+                            <a asp-page="/Account/RegisterDonor" class="btn btn-primary-custom">Become a Donor</a>
+                        }
+                    </div>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Adjust top margin for fixed navbar -->
+    <div style="margin-top: 80px;">
+        <main role="main">
+            @RenderBody()
+        </main>
+    </div>
+
+    <footer class="footer-custom">
+        <div class="container">
+            <div class="row g-4">
+                <div class="col-lg-4 col-md-6">
+                    <div class="d-flex align-items-center gap-2 mb-3">
+                        <img src="~/images/logo.png" alt="Zariya Logo" style="height: 35px; filter: brightness(0) invert(1);" onerror="this.style.display='none';" />
+                        <h3 class="text-white m-0">Zariya</h3>
+                    </div>
+                    <p class="mb-3">Zariya Blood Donation Portal is a bridge of life. Connect with verified donors in real-time and help save lives when it matters most.</p>
+                    <div class="footer-socials">
+                        <a href="https://www.facebook.com/7scribes"><i class="fab fa-facebook"></i></a>
+                        <a href="https://www.x.com/7_scribes"><i class="fab fa-twitter"></i></a>
+                        <a href="https://www.instagram.com/7scribesofficial"><i class="fab fa-instagram"></i></a>
+                        <a href="https://www.linkedin.com/company/7scribes"><i class="fab fa-linkedin"></i></a>
+                    </div>
+                </div>
+                <div class="col-lg-2 col-md-6">
+                    <h4>Quick Links</h4>
+                    <ul class="footer-links">
+                        <li><a asp-page="/Donors/Search">Find Blood</a></li>
+                        <li><a asp-page="/Account/RegisterDonor">Become a Donor</a></li>
+                        <li><a asp-page="/Content/DonorGuide">Donor Guide</a></li>
+                        <li><a asp-page="/Content/Testimonials">Testimonials</a></li>
+                        <li><a asp-page="/Content/About">About Us</a></li>
+                        <li><a asp-page="/Policies/Disclaimer">Disclaimer</a></li>
+                        <li><a asp-page="/Policies/Privacy">Privacy Policy</a></li>
+                    </ul>
+                </div>
+                <div class="col-lg-2 col-md-6">
+                    <h4>Support</h4>
+                    <ul class="footer-links">
+                        <li><a asp-page="/Support/HelpCenter">Help Center</a></li>
+                        <li><a asp-page="/Support/FAQ">FAQ</a></li>
+                        <li><a asp-page="/Content/Contact">Contact Us</a></li>
+                        <li><a asp-page="/Content/WhatWeDo">What We Do</a></li>
+                        <li><a asp-page="/Policies/Disclaimer">Disclaimer</a></li>
+                        <li><a asp-page="/Policies/TermsOfService">Terms of Use</a></li>
+                        <li><a asp-page="/Content/DonorGuide">Donor Guidelines</a></li>
+                    </ul>
+                </div>
+                <div class="col-lg-4 col-md-6">
+                    <h4>Contact Us</h4>
+                    <ul class="footer-links">
+                        <li><span class="text-muted"><i class="fas fa-envelope me-2 text-danger"></i> support@zariya.org</span></li>
+                        <li><span class="text-muted"><i class="fas fa-phone me-2 text-danger"></i>(+92) 341-8949391 </span></li>
+                        <li><span class="text-muted"><i class="fas fa-map-marker-alt me-2 text-danger"></i> Enterprise System, Course Project</span></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-12 text-center footer-bottom">
+                    <p class="m-0">&copy; @DateTime.Now.Year Zariya Digital Donor Portal. Connecting lives with reliability and empathy.</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

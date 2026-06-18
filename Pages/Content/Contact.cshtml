@@ -1,0 +1,93 @@
+@page
+@model ContactModel
+@{
+    ViewData["Title"] = "Contact Us - Zariya";
+}
+
+<section class="results-header text-center">
+    <div class="container">
+        <h1 class="display-5 fw-bold">Contact Zariya</h1>
+        <p class="lead text-muted">Got questions? We would love to hear from you.</p>
+    </div>
+</section>
+
+<div class="container py-5">
+    <div class="row g-5">
+        <!-- Contact details -->
+        <div class="col-lg-5">
+            <h2 class="fw-bold mb-4">Get In Touch</h2>
+            <p class="text-muted mb-4">Feel free to contact us through any of the channels below. We are here to assist you 24/7 with emergency support.</p>
+            
+            <div class="d-flex align-items-start gap-3 mb-3.5">
+                <div class="workflow-icon ms-0 me-3 mt-1"><i class="fas fa-envelope"></i></div>
+                <div>
+                    <h4 class="fw-bold h6 mb-1">Email Address</h4>
+                    <p class="text-muted">support@zariya.org</p>
+                </div>
+            </div>
+
+            <div class="d-flex align-items-start gap-3 mb-3.5">
+                <div class="workflow-icon ms-0 me-3 mt-1"><i class="fas fa-phone-alt"></i></div>
+                <div>
+                    <h4 class="fw-bold h6 mb-1">Phone Helpline</h4>
+                    <p class="text-muted">+1 (800) ZARIYA-LIFE (Emergency Support)</p>
+                </div>
+            </div>
+
+            <div class="d-flex align-items-start gap-3">
+                <div class="workflow-icon ms-0 me-3 mt-1"><i class="fas fa-map-marker-alt"></i></div>
+                <div>
+                    <h4 class="fw-bold h6 mb-1">Office Location</h4>
+                    <p class="text-muted">Enterprise System Course, University Campus, Pakistan</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Contact form -->
+        <div class="col-lg-7">
+            <div class="card border-0 shadow-sm p-4" style="border-radius: var(--radius-md);">
+                <h3 class="fw-bold mb-3">Send a Message</h3>
+                
+                @if (!string.IsNullOrEmpty(Model.SuccessMessage))
+                {
+                    <div class="alert alert-success alert-dismissible fade show" role="alert">
+                        <i class="fas fa-check-circle me-2"></i> @Model.SuccessMessage
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                }
+
+                <form method="post">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <div class="form-group-custom">
+                                <label for="name">Your Name</label>
+                                <input type="text" id="name" asp-for="Name" class="form-control-custom" placeholder="Enter full name" required />
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group-custom">
+                                <label for="email">Email Address</label>
+                                <input type="email" id="email" asp-for="Email" class="form-control-custom" placeholder="Enter email address" required />
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <div class="form-group-custom">
+                                <label for="subject">Subject</label>
+                                <input type="text" id="subject" asp-for="Subject" class="form-control-custom" placeholder="Enter subject" required />
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <div class="form-group-custom">
+                                <label for="message">Message</label>
+                                <textarea id="message" asp-for="Message" class="form-control-custom" rows="5" placeholder="Write your message here..." required></textarea>
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <button type="submit" class="btn btn-primary-custom px-4"><i class="fas fa-paper-plane me-1"></i> Send Message</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
